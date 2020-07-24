@@ -1,6 +1,7 @@
 require "csv"
 require 'google/apis/civicinfo_v2'
 require 'erb'
+require 'date'
 
 def clean_zipcode(zipcode)
   zipcode.to_s.rjust(5,"0")[0..4]
@@ -43,6 +44,11 @@ def save_thank_you_letter(id,form_letter)
   end
 end
 
+def clean_day(day)
+  format_day = Date.strptime(day, "%m/%d/%y")
+  puts Date::DAYNAMES[format_day.wday]
+end
+
 puts "EventManager Initialized!"
 
 contents = CSV.open "event_attendees.csv", headers: true, header_converters: :symbol
@@ -58,10 +64,12 @@ contents.each do |row|
 
   homephone = clean_phone_number(row[:homephone])
 
+  time = (row[:regdate]).split[1]
+
   legislators = legislators_by_zipcode(zipcode)
 
   form_letter = erb_template.result(binding)
 
-  save_thank_you_letter(id,form_letter)
+  puts clean_day(row[:regdate])
 
 end
